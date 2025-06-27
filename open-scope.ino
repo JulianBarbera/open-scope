@@ -1,37 +1,91 @@
 // -------------------- Constants --------------------
-#define dirPin 2
-#define stepPin 3
-#define scale 200
-#define SUCCESS 0
-#define FAILURE 1
-#define step_per_rot 400
-#define deg_per_step 1 / step_per_rot * 360
+#define kDirPin 2
+#define kStepPin 3
+
+const int success = 0;
+const int failure = 1;
+
+const int kStepPerRot = 400;
+const float kDegPerStep = 360.0 / kStepPerRot;
 
 // -------------------- Function Declarations --------------------
-bool raw_move(char axis, float degrees, float time);
+bool HandleCommand(const String& input);
+bool RawMove(char axis, float degrees, float time_sec);
+void PrintHelpMenu();
 
 // -------------------- Arduino Setup --------------------
 void setup() {
   Serial.begin(115200);
-  // Declare pins as output:
-  pinMode(stepPin, OUTPUT);
-  pinMode(dirPin, OUTPUT);
-  while (!Serial) {} // Wait for serial to begin
+  pinMode(kStepPin, OUTPUT);
+  pinMode(kDirPin, OUTPUT);
+  while (!Serial) {}  // Wait for serial to be ready
   Serial.println("\nWelcome to Open Scope");
 }
 
 // -------------------- Arduino Loop --------------------
-void loop() {}
+void loop() {
+  if (Serial.available()) {
+    String input_buffer = Serial.readStringUntil('\n');
+    input_buffer.trim();
+
+    if (input_buffer.equalsIgnoreCase("help")) {
+      PrintHelpMenu();
+    } else if (!HandleCommand(input_buffer)) {
+      Serial.println(
+          "Unknown command. Use \"help\" to list available commands.");
+    }
+  }
+}
+
+// -------------------- Command Handlers --------------------
+bool HandleCommand(const String& input) {
+  if (input.startsWith("raw")) {
+    char axis;
+    float degrees;
+    float time_sec;
+
+    int parsed = sscanf(input.c_str(), "raw %c %f %f",
+                        &axis, &degrees, &time_sec);
+    if (parsed != 3) {
+      Serial.println("Usage: raw <axis> <degrees> <time_sec>");
+      return failure;
+    }
+
+    return RawMove(axis, degrees, time_sec);
+  }
+
+  return failure;
+}
+
+// -------------------- Help Menu --------------------
+void PrintHelpMenu() {
+  Serial.println("\nWelcome to Open Scope!");
+  Serial.println("Available commands:");
+  Serial.println("    help              - Show this menu");
+  Serial.println("    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
+  Serial.println("                       e.g. raw X 90 2.0");
+  Serial.println();
+}
 
 // -------------------- Move an Axis --------------------
-bool raw_move(char axis, float degrees, float time) {
-  digitalWrite(dirPin, degrees > 0 ? true : false);
-  float interval = (degrees * deg_per_step) / (2 * time);
-  for (int i = 0; i < abs(degrees) * deg_per_step; i++) {
-    digitalWrite(stepPin, HIGH);
-    delay(interval);
-    digitalWrite(stepPin, LOW);
-    delay(interval);
+bool RawMove(char axis, float degrees, float time_sec) {
+  // axis parameter currently unused
+  digitalWrite(kDirPin, degrees > 0 ? HIGH : LOW);
+
+  int step_count = abs(degrees) / kDegPerStep;
+  if (step_count == 0 || time_sec <= 0) {
+    Serial.println("Invalid parameters for movement.");
+    return failure;
   }
-  return SUCCESS;
+
+  int interval_ms = (time_sec * 1000) / (2 * step_count);
+
+  for (int i = 0; i < step_count; ++i) {
+    digitalWrite(kStepPin, HIGH);
+    delay(interval_ms);
+    digitalWrite(kStepPin, LOW);
+    delay(interval_ms);
+  }
+
+  return success;
 }
