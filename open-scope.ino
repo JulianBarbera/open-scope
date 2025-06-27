@@ -5,8 +5,9 @@
 const int success = 0;
 const int failure = 1;
 
-const int kStepPerRot = 400;
-const float kDegPerStep = 360.0 / kStepPerRot;
+const int kStepPerRot = 800;
+const float kDegPerStep = kStepPerRot / 360.0;
+const float kDegPerDegElevation = kDegPerStep * 8;
 
 // -------------------- Function Declarations --------------------
 bool HandleCommand(const String& input);
@@ -15,7 +16,7 @@ void PrintHelpMenu();
 
 // -------------------- Arduino Setup --------------------
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(kStepPin, OUTPUT);
   pinMode(kDirPin, OUTPUT);
   while (!Serial) {}  // Wait for serial to be ready
@@ -70,9 +71,9 @@ void PrintHelpMenu() {
 // -------------------- Move an Axis --------------------
 bool RawMove(char axis, float degrees, float time_sec) {
   // axis parameter currently unused
-  digitalWrite(kDirPin, degrees > 0 ? HIGH : LOW);
+  digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);
 
-  int step_count = abs(degrees) / kDegPerStep;
+  int step_count = abs(degrees) * kDegPerDegElevation;
   if (step_count == 0 || time_sec <= 0) {
     Serial.println("Invalid parameters for movement.");
     return failure;
@@ -80,12 +81,19 @@ bool RawMove(char axis, float degrees, float time_sec) {
 
   int interval_ms = (time_sec * 1000) / (2 * step_count);
 
+  Serial.println("Performing raw move.");
+  Serial.print("Steps: ");
+  Serial.println(step_count);
+  Serial.print("Interval: ");
+  Serial.println(interval_ms);
+
+
   for (int i = 0; i < step_count; ++i) {
     digitalWrite(kStepPin, HIGH);
     delay(interval_ms);
     digitalWrite(kStepPin, LOW);
     delay(interval_ms);
   }
-
+  Serial.println("Raw move complete.");
   return success;
 }
