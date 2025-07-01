@@ -6,8 +6,8 @@ const bool success = true;
 const bool failure = false;
 
 const int kStepPerRot = 800;
-const float kDegPerStep = kStepPerRot / 360.0;
-const float kDegPerDegElevation = kDegPerStep * 8;
+const float kStepPerDeg = kStepPerRot / 360.0;
+const float kDegPerDegElevation = kStepPerDeg * 8;
 
 // -------------------- Function Declarations --------------------
 bool HandleCommand(const String& input);
@@ -76,7 +76,7 @@ bool RawMove(char axis, float degrees, float time_sec) {
   // axis parameter currently unused
   digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);
 
-  int step_count = abs(degrees) * kDegPerDegElevation;
+  int step_count = round(degrees * kStepPerDeg);
   if (step_count == 0 || time_sec <= 0) {
     Serial.println("Invalid parameters for movement.");
     return failure;
