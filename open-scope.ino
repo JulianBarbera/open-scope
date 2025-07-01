@@ -82,7 +82,7 @@ bool RawMove(char axis, float degrees, float time_sec) {
     return failure;
   }
 
-  int interval_ms = (time_sec * 1000) / (2 * step_count);
+  float interval_ms = (time_sec * 1000) / (2 * step_count);
 
   Serial.println("Performing raw move.");
   Serial.print("Steps: ");
