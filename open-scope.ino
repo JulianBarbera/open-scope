@@ -1,4 +1,5 @@
 // -------------------- Constants --------------------
+#include <Adafruit_BNO055.h>
 #define kDirPin 2
 #define kStepPin 3
 
@@ -14,6 +15,13 @@ bool HandleCommand(const String& input);
 bool RawMove(char axis, float degrees, float time_sec);
 void PrintHelpMenu();
 
+bool InitBno()
+{
+  Adafruit_BNO055 bno = Adafruit_BNO055();
+  Serial.println(bno.begin());
+  return true;
+}
+
 // -------------------- Arduino Setup --------------------
 void setup() {
   Serial.begin(9600);
@@ -22,6 +30,7 @@ void setup() {
   while (!Serial) {}  // Wait for serial to be ready
   Serial.println("\nWelcome to Open Scope");
   Serial.println();
+  InitBno();
 }
 
 // -------------------- Arduino Loop --------------------
