@@ -1,27 +1,18 @@
 // -------------------- Constants --------------------
 #include <Adafruit_BNO055.h>
+#include "bno.h"
 #define kDirPin 2
 #define kStepPin 3
 
-const bool success = true;
-const bool failure = false;
-
 const int kStepPerRot = 800;
 const float kStepPerDeg = kStepPerRot / 360.0;
-const float kDegPerDegElevation = kStepPerDeg * 8;
 
 // -------------------- Function Declarations --------------------
 bool HandleCommand(const String& input);
 bool RawMove(char axis, float degrees, float time_sec);
 void PrintHelpMenu();
 
-bool InitBno()
-{
-  Adafruit_BNO055 bno = Adafruit_BNO055();
-  Serial.println(bno.begin());
-  return true;
-}
-
+Adafruit_BNO055 bno = Adafruit_BNO055();
 // -------------------- Arduino Setup --------------------
 void setup() {
   Serial.begin(9600);
@@ -30,7 +21,7 @@ void setup() {
   while (!Serial) {}  // Wait for serial to be ready
   Serial.println("\nWelcome to Open Scope");
   Serial.println();
-  InitBno();
+  InitBno(bno);
 }
 
 // -------------------- Arduino Loop --------------------
@@ -61,13 +52,33 @@ bool HandleCommand(const String& input) {
     if (parsed != 3) {
       Serial.println("Usage: raw <axis> <degrees> <time_sec>");
       Serial.println();
-      return failure;
+      return false;
     }
 
     return RawMove(axis, degrees, time_sec);
   }
+  else if (input.startsWith("degrees"))
+  {
+    char axis;
+    int parsed = sscanf(input.c_str(), "degrees %c", &axis);
+    if (parsed != 1)
+    {
+      Serial.println("Usage: degrees <axis>");
+      Serial.println();
+      return false;
+    }
+    if (!IsValidAxis(axis))
+    {
+      Serial.println("Error: Invalid axis specified.");
+      Serial.println();
+      return true;
+    }
+    Serial.println(BnoAxisDeg(bno, axis));
+    Serial.println();
+    return true;
+  }
 
-  return failure;
+  return false;
 }
 
 // -------------------- Help Menu --------------------
@@ -88,7 +99,7 @@ bool RawMove(char axis, float degrees, float time_sec) {
   int step_count = round(abs(degrees) * kStepPerDeg);
   if (step_count == 0 || time_sec <= 0) {
     Serial.println("Invalid parameters for movement.");
-    return failure;
+    return false;
   }
 
   float interval_ms = (time_sec * 1000) / (2 * step_count);
@@ -109,5 +120,5 @@ bool RawMove(char axis, float degrees, float time_sec) {
   }
   Serial.println("Raw move complete.");
   Serial.println();
-  return success;
+  return true;
 }
