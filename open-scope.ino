@@ -76,7 +76,7 @@ bool RawMove(char axis, float degrees, float time_sec) {
   // axis parameter currently unused
   digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);
 
-  int step_count = round(degrees * kStepPerDeg);
+  int step_count = round(abs(degrees) * kStepPerDeg);
   if (step_count == 0 || time_sec <= 0) {
     Serial.println("Invalid parameters for movement.");
     return failure;
