@@ -5,7 +5,7 @@ bool InitBno(Adafruit_BNO055 &bno)
   if (!is_connected)
     Serial.println("Can't connect to Adafruit BNO055!");
 
-  /* Use external crystal for better accuracy (taken from BNO055 examples)*/
+  /* Use external crystal for better accuracy (taken from BNO055 examples) */
   bno.setExtCrystalUse(true);
   return is_connected;
 }
@@ -18,9 +18,6 @@ inline bool IsValidAxis(char axis)
 }
 float BnoAxisDeg(Adafruit_BNO055 &bno, char axis)
 {
-  /* Make axis char lowercase */
-  if (axis >= 'A' && axis <= 'Z')
-    axis += 32;
 /* Event API found at https://github.com/adafruit/Adafruit_Sensor/blob/master/Adafruit_Sensor.h */
   sensors_event_t event;
   bno.getEvent(&event);
@@ -35,4 +32,9 @@ float BnoAxisDeg(Adafruit_BNO055 &bno, char axis)
     default:
       return event.orientation.x;
   }
+}
+
+void Calibrate(Adafruit_BNO055 &bno)
+{
+
 }
