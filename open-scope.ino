@@ -2,8 +2,8 @@
 #define kDirPin 2
 #define kStepPin 3
 
-const int success = 0;
-const int failure = 1;
+const bool success = true;
+const bool failure = false;
 
 const int kStepPerRot = 800;
 const float kDegPerStep = kStepPerRot / 360.0;
