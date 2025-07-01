@@ -21,6 +21,7 @@ void setup() {
   pinMode(kDirPin, OUTPUT);
   while (!Serial) {}  // Wait for serial to be ready
   Serial.println("\nWelcome to Open Scope");
+  Serial.println();
 }
 
 // -------------------- Arduino Loop --------------------
@@ -34,6 +35,7 @@ void loop() {
     } else if (!HandleCommand(input_buffer)) {
       Serial.println(
           "Unknown command. Use \"help\" to list available commands.");
+      Serial.println();
     }
   }
 }
@@ -49,6 +51,7 @@ bool HandleCommand(const String& input) {
                         &axis, &degrees, &time_sec);
     if (parsed != 3) {
       Serial.println("Usage: raw <axis> <degrees> <time_sec>");
+      Serial.println();
       return failure;
     }
 
@@ -95,5 +98,6 @@ bool RawMove(char axis, float degrees, float time_sec) {
     delay(interval_ms);
   }
   Serial.println("Raw move complete.");
+  Serial.println();
   return success;
 }
