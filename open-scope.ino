@@ -88,7 +88,8 @@ bool RawMove(char axis, float degrees, float time_sec) {
   Serial.print("Steps: ");
   Serial.println(step_count);
   Serial.print("Interval: ");
-  Serial.println(interval_ms);
+  Serial.print(interval_ms);
+  Serial.print(" ms\n");
 
 
   for (int i = 0; i < step_count; ++i) {
