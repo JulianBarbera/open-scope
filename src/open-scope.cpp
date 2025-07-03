@@ -1,30 +1,33 @@
-// -------------------- Constants --------------------
+// main.cpp
+#include <Arduino.h>
 #include <Adafruit_BNO055.h>
 #include "bno.h"
+
 #define kDirPin 2
 #define kStepPin 3
 
 const int kStepPerRot = 800;
 const float kStepPerDeg = kStepPerRot / 360.0;
 
-// -------------------- Function Declarations --------------------
+Adafruit_BNO055 bno = Adafruit_BNO055();
+
+// Function Declarations
 bool HandleCommand(const String& input);
 bool RawMove(char axis, float degrees, float time_sec);
 void PrintHelpMenu();
 
-Adafruit_BNO055 bno = Adafruit_BNO055();
-// -------------------- Arduino Setup --------------------
+// Setup
 void setup() {
   Serial.begin(9600);
   pinMode(kStepPin, OUTPUT);
   pinMode(kDirPin, OUTPUT);
-  while (!Serial) {}  // Wait for serial to be ready
-  Serial.println("\nWelcome to Open Scope");
-  Serial.println();
+  while (!Serial) {}
+
+  Serial.println("\nWelcome to Open Scope\n");
   InitBno(bno);
 }
 
-// -------------------- Arduino Loop --------------------
+// Loop
 void loop() {
   if (Serial.available()) {
     String input_buffer = Serial.readStringUntil('\n');
@@ -33,46 +36,36 @@ void loop() {
     if (input_buffer.equalsIgnoreCase("help")) {
       PrintHelpMenu();
     } else if (!HandleCommand(input_buffer)) {
-      Serial.println(
-          "Unknown command. Use \"help\" to list available commands.");
-      Serial.println();
+      Serial.println("Unknown command. Use \"help\" to list available commands.\n");
     }
   }
 }
 
-// -------------------- Command Handlers --------------------
+// Command Handling
 bool HandleCommand(const String& input) {
   if (input.startsWith("raw")) {
     char axis;
     float degrees;
     float time_sec;
 
-    int parsed = sscanf(input.c_str(), "raw %c %f %f",
-                        &axis, &degrees, &time_sec);
+    int parsed = sscanf(input.c_str(), "raw %c %f %f", &axis, &degrees, &time_sec);
     if (parsed != 3) {
-      Serial.println("Usage: raw <axis> <degrees> <time_sec>");
-      Serial.println();
+      Serial.println("Usage: raw <axis> <degrees> <time_sec>\n");
       return false;
     }
-
     return RawMove(axis, degrees, time_sec);
-  }
-  else if (input.startsWith("degrees"))
-  {
+  } else if (input.startsWith("degrees")) {
     char axis;
     int parsed = sscanf(input.c_str(), "degrees %c", &axis);
-    if (parsed != 1)
-    {
-      Serial.println("Usage: degrees <axis>");
-      Serial.println();
+    if (parsed != 1) {
+      Serial.println("Usage: degrees <axis>\n");
       return false;
     }
-    if (!IsValidAxis(axis))
-    {
-      Serial.println("Error: Invalid axis specified.");
-      Serial.println();
+    if (!IsValidAxis(axis)) {
+      Serial.println("Error: Invalid axis specified.\n");
       return true;
     }
+
     Serial.println(BnoAxisDeg(bno, axis));
     Serial.println();
     return true;
@@ -81,19 +74,19 @@ bool HandleCommand(const String& input) {
   return false;
 }
 
-// -------------------- Help Menu --------------------
+// Help Menu
 void PrintHelpMenu() {
   Serial.println("\nWelcome to Open Scope!");
   Serial.println("Available commands:");
   Serial.println("    help              - Show this menu");
   Serial.println("    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
-  Serial.println("                       e.g. raw X 90 2.0");
-  Serial.println();
+  Serial.println("                       e.g. raw X 90 2.0\n");
 }
 
-// -------------------- Move an Axis --------------------
+// Move Command
 bool RawMove(char axis, float degrees, float time_sec) {
-  // axis parameter currently unused
+  (void)axis; // axis currently unused
+
   digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);
 
   int step_count = round(abs(degrees) * kStepPerDeg);
@@ -105,12 +98,8 @@ bool RawMove(char axis, float degrees, float time_sec) {
   float interval_ms = (time_sec * 1000) / (2 * step_count);
 
   Serial.println("Performing raw move.");
-  Serial.print("Steps: ");
-  Serial.println(step_count);
-  Serial.print("Interval: ");
-  Serial.print(interval_ms);
-  Serial.print(" ms\n");
-
+  Serial.print("Steps: "); Serial.println(step_count);
+  Serial.print("Interval: "); Serial.print(interval_ms); Serial.println(" ms\n");
 
   for (int i = 0; i < step_count; ++i) {
     digitalWrite(kStepPin, HIGH);
@@ -118,7 +107,8 @@ bool RawMove(char axis, float degrees, float time_sec) {
     digitalWrite(kStepPin, LOW);
     delay(interval_ms);
   }
-  Serial.println("Raw move complete.");
-  Serial.println();
+
+  Serial.println("Raw move complete.\n");
   return true;
 }
+
