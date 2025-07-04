@@ -20,7 +20,16 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 bool HandleCommand(const String &input);
 bool RawMove(char axis, float degrees, float time_sec);
 void PrintHelpMenu();
-void displayInfo();
+bool UpdateGPS();
+void DisplayGPS();
+
+// Variables
+u32_t sats = 0;
+double lat_d = 0;
+double lng_d = 0;
+double alt_m = 0;
+double date_dmy = 0;
+u32_t time_cs = 0;
 
 // Setup
 void setup() {
@@ -128,47 +137,36 @@ bool RawMove(char axis, float degrees, float time_sec) {
   Serial.println("Raw move complete.\n");
   return true;
 }
-void displayInfo() {
-  Serial.print(F("Location: "));
+
+bool UpdateGPS() {
   if (gps.location.isValid()) {
-    Serial.print(gps.location.lat(), 6);
-    Serial.print(F(","));
-    Serial.print(gps.location.lng(), 6);
-  } else {
-    Serial.print(F("INVALID"));
+    sats = gps.satellites.value();
+    lat_d = gps.location.lat();
+    lng_d = gps.location.lng();
+    alt_m = gps.altitude.meters();
+    date_dmy = gps.date.value();
+    time_cs = gps.time.value();
+    return true;
   }
+  return false;
+}
 
-  Serial.print(F("  Date/Time: "));
-  if (gps.date.isValid()) {
-    Serial.print(gps.date.month());
-    Serial.print(F("/"));
-    Serial.print(gps.date.day());
-    Serial.print(F("/"));
-    Serial.print(gps.date.year());
+void DisplayGPS() {
+  if (UpdateGPS()) {
+    Serial.print("num sats: ");
+    Serial.print(sats);
+    Serial.print(" lat: ");
+    Serial.print(lat_d);
+    Serial.print(" lng: ");
+    Serial.print(lng_d);
+    Serial.print(" alt: ");
+    Serial.print(alt_m);
+    Serial.print(" date: ");
+    Serial.print(date_dmy);
+    Serial.print(" time: ");
+    Serial.print(time_cs);
+    Serial.println();
   } else {
-    Serial.print(F("INVALID"));
+    Serial.println("Satellite error.");
   }
-
-  Serial.print(F(" "));
-  if (gps.time.isValid()) {
-    if (gps.time.hour() < 10)
-      Serial.print(F("0"));
-    Serial.print(gps.time.hour());
-    Serial.print(F(":"));
-    if (gps.time.minute() < 10)
-      Serial.print(F("0"));
-    Serial.print(gps.time.minute());
-    Serial.print(F(":"));
-    if (gps.time.second() < 10)
-      Serial.print(F("0"));
-    Serial.print(gps.time.second());
-    Serial.print(F("."));
-    if (gps.time.centisecond() < 10)
-      Serial.print(F("0"));
-    Serial.print(gps.time.centisecond());
-  } else {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.println();
 }
