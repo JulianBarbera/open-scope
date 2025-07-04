@@ -8,6 +8,9 @@
 #define kDirPin 2
 #define kStepPin 3
 
+#define uimu
+#define ugps
+
 HardwareSerial gpsSerial(1);
 TinyGPSPlus gps;
 
@@ -41,7 +44,7 @@ void setup() {
   }
 
   Serial.println("\nWelcome to Open Scope\n");
-  // InitBno(bno);
+  InitBno(bno);
 }
 
 // Loop
@@ -58,9 +61,9 @@ void loop() {
     }
   }
 
-  while (gpsSerial.available() > 0)
-    if (gps.encode(gpsSerial.read()))
-      displayInfo();
+  while (gpsSerial.available() > 0) {
+    gps.encode(gpsSerial.read());
+  }
 }
 
 // Command Handling
@@ -92,6 +95,9 @@ bool HandleCommand(const String &input) {
     Serial.println(BnoAxisDeg(bno, axis));
     Serial.println();
     return true;
+  } else if (input.startsWith("gps-print")) {
+    DisplayGPS();
+    return false;
   }
 
   return false;
@@ -99,11 +105,14 @@ bool HandleCommand(const String &input) {
 
 // Help Menu
 void PrintHelpMenu() {
-  Serial.println("\nWelcome to Open Scope!");
+  Serial.println();
+  Serial.println("Welcome to Open Scope!");
   Serial.println("Available commands:");
   Serial.println("    help              - Show this menu");
   Serial.println("    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
-  Serial.println("                       e.g. raw X 90 2.0\n");
+  Serial.println("                       e.g. raw X 90 2.0");
+  Serial.println("    gps-print         - Print out all GPS data");
+  Serial.println();
 }
 
 // Move Command
