@@ -8,9 +8,6 @@
 #define kDirPin 2
 #define kStepPin 3
 
-#define uimu
-#define ugps
-
 HardwareSerial gpsSerial(1);
 TinyGPSPlus gps;
 
