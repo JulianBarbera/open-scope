@@ -61,7 +61,6 @@ void loop() {
   while (gpsSerial.available() > 0) {
     gps.encode(gpsSerial.read());
   }
-  UpdateGPS();
 }
 
 // Command Handling
