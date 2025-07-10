@@ -58,7 +58,7 @@ bool HandleCommand(const String& input) {
     char axis;
     int parsed = sscanf(input.c_str(), "degrees %c", &axis);
     if (parsed != 1) {
-      Serial.println("Usage: degrees <axis>\n");
+      Serial.println("Usage: degrees <a>\n");
       return false;
     }
     if (!IsValidAxis(axis)) {
@@ -78,9 +78,13 @@ bool HandleCommand(const String& input) {
 void PrintHelpMenu() {
   Serial.println("\nWelcome to Open Scope!");
   Serial.println("Available commands:");
-  Serial.println("    help              - Show this menu");
+  Serial.println("    help              - Show this menu\n");
+
   Serial.println("    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
   Serial.println("                       e.g. raw X 90 2.0\n");
+
+  Serial.println("    degrees <a>       - display orientation of axis <a> in degrees");
+  Serial.println("                      - takes in axes 'x', 'y', or 'z'\n");
 }
 
 // Move Command
