@@ -55,8 +55,27 @@ float BnoHeadingDeg()
     return theta_deg;
 }
 
-void Calibrate()
-{
-	while (BnoAxisDeg('x')) {
-	}
+void CalibrateX() {
+  Serial.println("Begining calibration sequence");
+  int calibrationStep = 1;      // Degrees
+  float calibrationTime = 0.5;  // Time to execute step
+  float tolerance = 5;          // Tolerance of calibration
+  int degOut = 0;
+  if (abs(BnoAxisDeg('x')) >= tolerance) {
+    Serial.println("Please point scope perpendicular to ground and try again.");
+    return;
+  }
+  while (abs(90 - BnoAxisDeg('x')) >= tolerance) {
+    RawMove('x', calibrationStep, calibrationTime);
+    degOut += calibrationStep;
+    delay(calibrationTime);
+    Serial.println(BnoAxisDeg('x'));
+  }
+  Serial.println("Calibration complete!");
+  Serial.println("Results:");
+  Serial.print("Degrees out: ");
+  Serial.println(degOut);
+  float multiplier = degOut / 90;
+  Serial.print("Multiplier: ");
+  Serial.println(multiplier);
 }

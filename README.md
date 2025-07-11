@@ -16,7 +16,7 @@ platformio run -e seeed_xiao_esp32c3
 platformio run -e teensy41
 
 # Upload to ESP32C3
-platformio run -t upload -e ESP32C3
+platformio run -t upload -e seeed_xiao_esp32c3
 
 # Upload to Teensy 4.1
 platformio run -t upload -e teensy41
