@@ -63,8 +63,9 @@ HandleCommand(const String& input)
 		Serial.println(BnoAxisDeg(axis));
 		Serial.println();
 		return true;
+	} else if (input.startsWith("calibrate")) {
+		CalibrateX();
 	}
-
 	return false;
 }
 
@@ -82,6 +83,8 @@ PrintHelpMenu()
 	Serial.println(
 		"    degrees <a>       - display orientation of axis <a> in degrees");
 	Serial.println("                      - takes in axes 'x', 'y', or 'z'\n");
+	Serial.println("    calibrate   - Calibrate X axis stepper motor");
+	Serial.println("                       e.g. calibrate\n");
 }
 
 // Move Command
