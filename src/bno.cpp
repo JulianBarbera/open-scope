@@ -4,7 +4,8 @@
 
 Adafruit_BNO055 bno = Adafruit_BNO055();
 
-bool InitBno()
+bool
+InitBno()
 {
 
 	bool is_connected = bno.begin();
@@ -16,14 +17,15 @@ bool InitBno()
 	return is_connected;
 }
 
-bool IsValidAxis(char axis)
+bool
+IsValidAxis(char axis)
 {
-	return (axis == 'x' || axis == 'X' ||
-            axis == 'y' || axis == 'Y' ||
-            axis == 'z' || axis == 'Z');
+	return (axis == 'x' || axis == 'X' || axis == 'y' || axis == 'Y' ||
+			axis == 'z' || axis == 'Z');
 }
 
-float BnoAxisDeg(char axis)
+float
+BnoAxisDeg(char axis)
 {
 	/* Event API found at
 	 * https://github.com/adafruit/Adafruit_Sensor/blob/master/Adafruit_Sensor.h
@@ -41,22 +43,24 @@ float BnoAxisDeg(char axis)
 	}
 }
 
-float BnoHeadingDeg()
+float
+BnoHeadingDeg()
 {
-    sensors_event_t magneticVec;
-    bno.getEvent(&magneticVec, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+	sensors_event_t magneticVec;
+	bno.getEvent(&magneticVec, Adafruit_BNO055::VECTOR_MAGNETOMETER);
 
-    // update to account for tilt?
-    float tan_theta = magneticVec.magnetic.y / magneticVec.magnetic.x;
-    float theta = atan(tan_theta);
-    float theta_deg = theta * SENSORS_RADS_TO_DPS;
-    if (theta_deg < 0)
-        theta_deg += 360;
+	// update to account for tilt?
+	float tan_theta = magneticVec.magnetic.y / magneticVec.magnetic.x;
+	float theta = atan(tan_theta);
+	float theta_deg = theta * SENSORS_RADS_TO_DPS;
+	if (theta_deg < 0)
+		theta_deg += 360;
 
-    return theta_deg;
+	return theta_deg;
 }
 
-void CalibrateX()
+void
+CalibrateX()
 {
 	Serial.println("Begining calibration sequence");
 	int calibrationStep = 1;	 // Degrees
@@ -78,7 +82,7 @@ void CalibrateX()
 	Serial.println("Results:");
 	Serial.print("Degrees out: ");
 	Serial.println(degOut);
-	float multiplier = (float)degOut / 90;
+	multiplier = 90 / (float)degOut;
 	Serial.print("Multiplier: ");
 	Serial.println(multiplier);
 }
