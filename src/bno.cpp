@@ -1,9 +1,9 @@
 // bno.cpp
 #include "open-scope.h"
+#include <math.h>
 Adafruit_BNO055 bno = Adafruit_BNO055();
 
-bool
-InitBno()
+bool InitBno()
 {
 
 	bool is_connected = bno.begin();
@@ -15,15 +15,14 @@ InitBno()
 	return is_connected;
 }
 
-bool
-IsValidAxis(char axis)
+bool IsValidAxis(char axis)
 {
-	if (axis >= 'A' && axis <= 'Z')
-		axis += 32;
-	return (axis == 'x' || axis == 'y' || axis == 'z');
+	return (axis == 'x' || axis == 'X' ||
+            axis == 'y' || axis == 'Y' ||
+            axis == 'z' || axis == 'Z');
 }
-float
-BnoAxisDeg(char axis)
+
+float BnoAxisDeg(char axis)
 {
 	/* Event API found at
 	 * https://github.com/adafruit/Adafruit_Sensor/blob/master/Adafruit_Sensor.h
@@ -31,19 +30,32 @@ BnoAxisDeg(char axis)
 	sensors_event_t event;
 	bno.getEvent(&event);
 	switch (axis) {
-	case 'x':
-		return event.orientation.x;
 	case 'y':
 		return event.orientation.y;
 	case 'z':
 		return event.orientation.z;
+	case 'x':
 	default:
 		return event.orientation.x;
 	}
 }
 
-void
-Calibrate()
+float BnoHeadingDeg()
+{
+    sensors_event_t magneticVec;
+    bno.getEvent(&magneticVec, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+    // update to account for tilt?
+    float tan_theta = magneticVec.magnetic.y / magneticVec.magnetic.x;
+    float theta = atan(tan_theta);
+    float theta_deg = theta * SENSORS_RADS_TO_DPS;
+    if (theta_deg < 0)
+        theta_deg += 360;
+
+    return theta_deg;
+}
+
+void Calibrate()
 {
 	while (BnoAxisDeg('x')) {
 	}
