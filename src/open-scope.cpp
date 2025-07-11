@@ -27,7 +27,7 @@ loop()
 			PrintHelpMenu();
 		} else if (!HandleCommand(input_buffer)) {
 			Serial.println(
-			    "Unknown command. Use \"help\" to list available commands.\n");
+				"Unknown command. Use \"help\" to list available commands.\n");
 		}
 	}
 }
@@ -41,11 +41,10 @@ HandleCommand(const String& input)
 		float degrees;
 		float time_sec;
 
-		int parsed = sscanf(input.c_str(), "raw %c %f %f", &axis,
-				    &degrees, &time_sec);
+		int parsed =
+			sscanf(input.c_str(), "raw %c %f %f", &axis, &degrees, &time_sec);
 		if (parsed != 3) {
-			Serial.println(
-			    "Usage: raw <axis> <degrees> <time_sec>\n");
+			Serial.println("Usage: raw <axis> <degrees> <time_sec>\n");
 			return false;
 		}
 		return RawMove(axis, degrees, time_sec);
@@ -77,14 +76,12 @@ PrintHelpMenu()
 	Serial.println("Available commands:");
 	Serial.println("    help              - Show this menu\n");
 
-	Serial.println(
-	    "    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
+	Serial.println("    raw <a> <d> <t>   - Move axis <a> by <d>° in <t> sec");
 	Serial.println("                       e.g. raw X 90 2.0\n");
 
 	Serial.println(
-	    "    degrees <a>       - display orientation of axis <a> in degrees");
-	Serial.println(
-	    "                      - takes in axes 'x', 'y', or 'z'\n");
+		"    degrees <a>       - display orientation of axis <a> in degrees");
+	Serial.println("                      - takes in axes 'x', 'y', or 'z'\n");
 }
 
 // Move Command
