@@ -2,19 +2,7 @@
 #include "open-scope.h"
 #include <math.h>
 Adafruit_BNO055 bno = Adafruit_BNO055();
-
-bool InitBno()
-{
-
-	bool is_connected = bno.begin();
-	if (!is_connected)
-		Serial.println("Can't connect to Adafruit BNO055!");
-	/* Use external crystal for better accuracy (taken from BNO055 examples)
-	 */
-	bno.setExtCrystalUse(true);
-	return is_connected;
-}
-
+<<<<<<< HEAD
 bool IsValidAxis(char axis)
 {
 	return (axis == 'x' || axis == 'X' ||
@@ -55,27 +43,30 @@ float BnoHeadingDeg()
     return theta_deg;
 }
 
-void CalibrateX() {
-  Serial.println("Begining calibration sequence");
-  int calibrationStep = 1;      // Degrees
-  float calibrationTime = 0.5;  // Time to execute step
-  float tolerance = 5;          // Tolerance of calibration
-  int degOut = 0;
-  if (abs(BnoAxisDeg('x')) >= tolerance) {
-    Serial.println("Please point scope perpendicular to ground and try again.");
-    return;
-  }
-  while (abs(90 - BnoAxisDeg('x')) >= tolerance) {
-    RawMove('x', calibrationStep, calibrationTime);
-    degOut += calibrationStep;
-    delay(calibrationTime);
-    Serial.println(BnoAxisDeg('x'));
-  }
-  Serial.println("Calibration complete!");
-  Serial.println("Results:");
-  Serial.print("Degrees out: ");
-  Serial.println(degOut);
-  float multiplier = degOut / 90;
-  Serial.print("Multiplier: ");
-  Serial.println(multiplier);
+void
+CalibrateX()
+{
+	Serial.println("Begining calibration sequence");
+	int calibrationStep = 1;	 // Degrees
+	float calibrationTime = 0.5; // Time to execute step
+	float tolerance = 5;		 // Tolerance of calibration
+	int degOut = 0;
+	if (abs(BnoAxisDeg('x')) >= tolerance) {
+		Serial.println(
+			"Please point scope perpendicular to ground and try again.");
+		return;
+	}
+	while (abs(90 - BnoAxisDeg('x')) >= tolerance) {
+		RawMove('x', calibrationStep, calibrationTime);
+		degOut += calibrationStep;
+		delay(calibrationTime);
+		Serial.println(BnoAxisDeg('x'));
+	}
+	Serial.println("Calibration complete!");
+	Serial.println("Results:");
+	Serial.print("Degrees out: ");
+	Serial.println(degOut);
+	float multiplier = (float)degOut / 90;
+	Serial.print("Multiplier: ");
+	Serial.println(multiplier);
 }
