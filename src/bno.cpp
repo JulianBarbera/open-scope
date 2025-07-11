@@ -1,8 +1,21 @@
 // bno.cpp
 #include "open-scope.h"
 #include <math.h>
+
 Adafruit_BNO055 bno = Adafruit_BNO055();
-<<<<<<< HEAD
+
+bool InitBno()
+{
+
+	bool is_connected = bno.begin();
+	if (!is_connected)
+		Serial.println("Can't connect to Adafruit BNO055!");
+	/* Use external crystal for better accuracy (taken from BNO055 examples)
+	 */
+	bno.setExtCrystalUse(true);
+	return is_connected;
+}
+
 bool IsValidAxis(char axis)
 {
 	return (axis == 'x' || axis == 'X' ||
@@ -43,8 +56,7 @@ float BnoHeadingDeg()
     return theta_deg;
 }
 
-void
-CalibrateX()
+void CalibrateX()
 {
 	Serial.println("Begining calibration sequence");
 	int calibrationStep = 1;	 // Degrees
