@@ -23,6 +23,7 @@ void PrintHelpMenu();
 
 // BNO Function Decs
 float BnoAxisDeg(char axis);
+float BnoHeadingDeg();
 bool InitBno();
 void CalibrateX();
 bool IsValidAxis(char axis);

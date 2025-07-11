@@ -58,7 +58,14 @@ bool HandleCommand(const String& input) {
     Serial.println();
     return true;
   } else if (input.startsWith("calibrate")) {
-    CalibrateX();
+      CalibrateX();
+  }
+    else if (input.startsWith("heading")) {
+      float heading = BnoHeadingDeg();
+      Serial.println(heading);
+      Serial.println();
+
+      return true;
   }
   return false;
 }
@@ -73,10 +80,13 @@ void PrintHelpMenu() {
   Serial.println("                       e.g. raw X 90 2.0\n");
 
   Serial.println(
-      "    degrees <a>       - display orientation of axis <a> in degrees");
+                 "    degrees <a>       - display orientation of axis <a> in degrees");
   Serial.println("                      - takes in axes 'x', 'y', or 'z'\n");
-  Serial.println("    calibrate   - Calibrate X axis stepper motor");
+  Serial.println("    calibrate         - Calibrate X axis stepper motor");
   Serial.println("                       e.g. calibrate\n");
+
+  Serial.println("    heading           - print current heading with respect to magnetic north");
+  Serial.println("                       e.g. heading\n");
 }
 
 // Move Command
