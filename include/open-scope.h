@@ -18,14 +18,14 @@ extern Adafruit_BNO055 bno;
 
 // Function Declarations
 bool HandleCommand(const String &input);
-bool RawMove(char axis, float degrees, float time_sec);
+bool RawMove(char axis, float degrees, float time_sec, float multiplier);
 void PrintHelpMenu();
 
 // BNO Function Decs
 float BnoAxisDeg(char axis);
 float BnoHeadingDeg();
 bool InitBno();
-void CalibrateX();
+void CalibrateX(float &multiplier);
 bool IsValidAxis(char axis);
 
 #endif

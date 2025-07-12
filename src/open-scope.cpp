@@ -1,8 +1,6 @@
 // open-scope.cpp
 #include "open-scope.h"
 
-float multiplier = 1;
-
 // Setup
 void setup() {
   Serial.begin(9600);
@@ -32,6 +30,8 @@ void loop() {
 
 // Command Handling
 bool HandleCommand(const String& input) {
+  static float multiplier = 1;
+
   if (input.startsWith("raw")) {
     char axis;
     float degrees;
@@ -43,7 +43,8 @@ bool HandleCommand(const String& input) {
       Serial.println("Usage: raw <axis> <degrees> <time_sec>\n");
       return false;
     }
-    return RawMove(axis, degrees, time_sec);
+
+    return RawMove(axis, degrees, time_sec, multiplier);
   } else if (input.startsWith("degrees")) {
     char axis;
     int parsed = sscanf(input.c_str(), "degrees %c", &axis);
@@ -60,7 +61,7 @@ bool HandleCommand(const String& input) {
     Serial.println();
     return true;
   } else if (input.startsWith("calibrate")) {
-    CalibrateX();
+    CalibrateX(multiplier);
   } else if (input.startsWith("heading")) {
     float heading = BnoHeadingDeg();
     Serial.println(heading);
@@ -93,7 +94,7 @@ void PrintHelpMenu() {
 }
 
 // Move Command
-bool RawMove(char axis, float degrees, float time_sec) {
+bool RawMove(char axis, float degrees, float time_sec, float multiplier = 1) {
   (void)axis;  // axis currently unused
 
   digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);

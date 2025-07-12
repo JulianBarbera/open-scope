@@ -49,7 +49,7 @@ float BnoHeadingDeg() {
   return theta_deg;
 }
 
-void CalibrateX() {
+void CalibrateX(float &multiplier) {
   Serial.println("Begining calibration sequence");
   int calibrationStep = 1;      // Degrees
   float calibrationTime = 0.5;  // Time to execute step
@@ -60,7 +60,7 @@ void CalibrateX() {
     return;
   }
   while (abs(90 - BnoAxisDeg('x')) >= tolerance) {
-    RawMove('x', calibrationStep, calibrationTime);
+    RawMove('x', calibrationStep, calibrationTime, multiplier);
     degOut += calibrationStep;
     delay(calibrationTime);
     Serial.println(BnoAxisDeg('x'));
