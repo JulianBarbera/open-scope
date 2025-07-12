@@ -27,10 +27,13 @@ float BnoAxisDeg(char axis) {
   bno.getEvent(&event);
   switch (axis) {
     case 'y':
+    case 'Y':
       return event.orientation.y;
     case 'z':
+    case 'Z':
       return event.orientation.z;
     case 'x':
+    case 'X':
     default:
       return event.orientation.x;
   }
