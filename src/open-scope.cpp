@@ -24,7 +24,7 @@ void loop() {
   static unsigned int cursor = 0;
   static String input_buffer = "";
   static String history = "";
-  static unsigned int history_cursor = 0;
+  static int history_cursor = 0;
   static TtyState state = normal;
   if (Serial.available()) {
     char c = Serial.read();
@@ -65,7 +65,7 @@ void loop() {
         cursor -= 1;
       }
     } else if (c == 12 /* Ctrl+L */) {
-      Serial.write("\x1b[H> ");
+      Serial.write("\x1b[2J\x1b[H> ");
       Serial.print(input_buffer);
     } else if (c == 27) {
       state = arrow_1;
@@ -83,15 +83,41 @@ void loop() {
           cursor += 1;
           Serial.write("\x1b[1C");
         }
-      }
-      if (c == 'D' /* Arrow Left */) {
+      } else if (c == 'D' /* Arrow Left */) {
         if (cursor > 0) {
           cursor -= 1;
           Serial.write("\x1b[1D");
         }
+      } else if (c == 'A' /* Arrow Up */) {
+        if (history_cursor == -1)
+          return;
+        int start = history.lastIndexOf('\n', history_cursor - 1);
+        if (start == -1)
+          start = -1;
+        String line = history.substring(start + 1, history_cursor);
+        input_buffer = line;
+        Serial.write("\x1b[1K\r> ");
+        Serial.print(line);
+        cursor = input_buffer.length();
+        history_cursor = start;
+      } else if (c == 'B' /* Arrow Down */) {
+        if (history_cursor >= (int)(history.length()))
+          return;
+        int start = history.indexOf('\n', history_cursor + 1);
+        if (start == -1)
+          start = history.length();
+        else
+          start += 1;
+        int end = history.indexOf('\n', start);
+        if (end == -1)
+          end = history.length();
+        String line = history.substring(start, end);
+        input_buffer = line;
+        Serial.write("\x1b[1K\r> ");
+        Serial.print(line);
+        cursor = input_buffer.length();
+        history_cursor = end;
       }
-      if (c == 'A' /* Arrow Up */) {}
-      if (c == 'B' /* Arrow Down */) {}
     } else if (c != '\r') {
       if ((c == ' ') || (c > 32 && c < 127)) {
         unsigned int len = input_buffer.length();
@@ -155,6 +181,9 @@ bool HandleCommand(const String& input) {
     Serial.println(heading);
     Serial.println();
 
+    return true;
+  } else if (input.startsWith("snow")) {
+    Serial.println("\x1b[36msnow\x1b[0m");
     return true;
   }
   return false;
