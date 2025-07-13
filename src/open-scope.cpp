@@ -219,7 +219,8 @@ bool RawMove(char axis, float degrees, float time_sec, float multiplier = 1) {
 
   int step_count = round(abs(degrees) * kStepPerDeg * multiplier);
   float interval_us = (time_sec * 1000 * 1000) / (2 * step_count);
-  if (step_count == 0 || time_sec <= 0 || interval_us < 100) {
+  interval_us = interval_us < 150 ? 150 : interval_us;
+  if (step_count == 0 || time_sec <= 0) {
     Serial.println("Invalid parameters for movement.");
     return false;
   }
