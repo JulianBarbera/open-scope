@@ -17,7 +17,7 @@ extern float multiplier;
 extern Adafruit_BNO055 bno;
 
 // Function Declarations
-bool HandleCommand(const String &input);
+bool HandleCommand(const String& input);
 bool RawMove(char axis, float degrees, float time_sec, float multiplier);
 void PrintHelpMenu();
 
@@ -25,7 +25,7 @@ void PrintHelpMenu();
 float BnoAxisDeg(char axis);
 float BnoHeadingDeg();
 bool InitBno();
-void CalibrateX(float &multiplier);
+void CalibrateX(float& multiplier);
 bool IsValidAxis(char axis);
 
 #endif

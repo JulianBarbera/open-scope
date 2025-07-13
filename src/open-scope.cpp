@@ -6,31 +6,119 @@ void setup() {
   Serial.begin(9600);
   pinMode(kStepPin, OUTPUT);
   pinMode(kDirPin, OUTPUT);
-  while (!Serial) {
-  }
-
-  Serial.println("\nWelcome to Open Scope\n");
+  while (!Serial) {}
+  while (!Serial.available()) {}
   InitBno();
+  Serial.print("\nWelcome to Open Scope\n> ");
 }
+
+enum TtyState {
+  normal,
+  arrow_1,
+  arrow_2,
+};
 
 // Loop
 void loop() {
+  // handy shell with backspace + arrow key + history support
+  static unsigned int cursor = 0;
+  static String input_buffer = "";
+  static String history = "";
+  static unsigned int history_cursor = 0;
+  static TtyState state = normal;
   if (Serial.available()) {
-    String input_buffer = Serial.readStringUntil('\n');
-    input_buffer.trim();
+    char c = Serial.read();
+    if (c == '\n') {
+      Serial.write("\n");
+      input_buffer.trim();
+      if (input_buffer.length() > 0) {
+        if (history.length() > 0)
+          history += "\n";
+        history += input_buffer;
+        history_cursor = history.length();
 
-    if (input_buffer.equalsIgnoreCase("help")) {
-      PrintHelpMenu();
-    } else if (!HandleCommand(input_buffer)) {
-      Serial.println(
-          "Unknown command. Use \"help\" to list available commands.\n");
+        if (input_buffer.equalsIgnoreCase("help")) {
+          PrintHelpMenu();
+        } else if (!HandleCommand(input_buffer)) {
+          Serial.println(
+              "Unknown command. Use \"help\" to list available commands.\n");
+        }
+      }
+      input_buffer = "";
+      state = normal;
+      cursor = 0;
+      Serial.write("> ");
+    } else if (c == 0x8 /* backspace */) {
+      if (cursor > 0) {
+        if (cursor == input_buffer.length()) {
+          Serial.write("\x1b[1D \x1b[1D");
+        } else {
+          Serial.write("\x1b[1D");
+          String after = input_buffer.substring(cursor);
+          Serial.print(after);
+          Serial.write(" \x1b[");
+          Serial.print(after.length() + 1, 10);
+          Serial.write("D");
+        }
+        input_buffer = input_buffer.substring(0, cursor - 1) +
+                       input_buffer.substring(cursor);
+        cursor -= 1;
+      }
+    } else if (c == 12 /* Ctrl+L */) {
+      Serial.write("\x1b[H> ");
+      Serial.print(input_buffer);
+    } else if (c == 27) {
+      state = arrow_1;
+    } else if (state == arrow_1) {
+      if (c == '[') {
+        state = arrow_2;
+      } else {
+        state = normal;
+      }
+    } else if (state == arrow_2) {
+      state = normal;
+      if (c == 'C' /* Arrow Right */) {
+        unsigned int len = input_buffer.length();
+        if (cursor < len) {
+          cursor += 1;
+          Serial.write("\x1b[1C");
+        }
+      }
+      if (c == 'D' /* Arrow Left */) {
+        if (cursor > 0) {
+          cursor -= 1;
+          Serial.write("\x1b[1D");
+        }
+      }
+      if (c == 'A' /* Arrow Up */) {}
+      if (c == 'B' /* Arrow Down */) {}
+    } else if (c != '\r') {
+      if ((c == ' ') || (c > 32 && c < 127)) {
+        unsigned int len = input_buffer.length();
+        if (cursor == len) {
+          // append
+          input_buffer += c;
+          Serial.write(c);
+        } else {
+          // insert
+          String before = input_buffer.substring(0, cursor);
+          String after = input_buffer.substring(cursor);
+          input_buffer = before + String(c) + after;
+          Serial.write(c);
+          Serial.print(after);
+          Serial.write("\x1b[");
+          Serial.print(after.length(), 10);
+          Serial.write("D");
+        }
+        cursor += 1;
+      }
     }
   }
 }
 
 // Command Handling
 bool HandleCommand(const String& input) {
-  static float multiplier = 1;
+  static float multiplier = 9;
 
   if (input.startsWith("raw")) {
     char axis;
@@ -88,7 +176,8 @@ void PrintHelpMenu() {
   Serial.println("                       e.g. calibrate\n");
 
   Serial.println(
-      "    heading           - print current heading with respect to magnetic "
+      "    heading           - print current heading with respect to "
+      "magnetic "
       "north");
   Serial.println("                       e.g. heading\n");
 }
@@ -100,25 +189,24 @@ bool RawMove(char axis, float degrees, float time_sec, float multiplier = 1) {
   digitalWrite(kDirPin, degrees > 0 ? LOW : HIGH);
 
   int step_count = round(abs(degrees) * kStepPerDeg * multiplier);
-  if (step_count == 0 || time_sec <= 0) {
+  float interval_us = (time_sec * 1000 * 1000) / (2 * step_count);
+  if (step_count == 0 || time_sec <= 0 || interval_us < 100) {
     Serial.println("Invalid parameters for movement.");
     return false;
   }
-
-  float interval_ms = (time_sec * 1000) / (2 * step_count);
 
   Serial.println("Performing raw move.");
   Serial.print("Steps: ");
   Serial.println(step_count);
   Serial.print("Interval: ");
-  Serial.print(interval_ms);
-  Serial.println(" ms\n");
+  Serial.print(interval_us);
+  Serial.println(" us\n");
 
   for (int i = 0; i < step_count; ++i) {
     digitalWrite(kStepPin, HIGH);
-    delay(interval_ms);
+    delayMicroseconds(interval_us);
     digitalWrite(kStepPin, LOW);
-    delay(interval_ms);
+    delayMicroseconds(interval_us);
   }
 
   Serial.println("Raw move complete.\n");

@@ -7,7 +7,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 
 bool InitBno() {
   bool is_connected = bno.begin();
-  if (!is_connected) Serial.println("Can't connect to Adafruit BNO055!");
+  if (!is_connected)
+    Serial.println("Can't connect to Adafruit BNO055!");
   /* Use external crystal for better accuracy (taken from BNO055 examples)
    */
   bno.setExtCrystalUse(true);
@@ -47,12 +48,13 @@ float BnoHeadingDeg() {
   float tan_theta = magneticVec.magnetic.y / magneticVec.magnetic.x;
   float theta = atan(tan_theta);
   float theta_deg = theta * SENSORS_RADS_TO_DPS;
-  if (theta_deg < 0) theta_deg += 360;
+  if (theta_deg < 0)
+    theta_deg += 360;
 
   return theta_deg;
 }
 
-void CalibrateX(float &multiplier) {
+void CalibrateX(float& multiplier) {
   Serial.println("Begining calibration sequence");
   int calibrationStep = 1;      // Degrees
   float calibrationTime = 0.5;  // Time to execute step
