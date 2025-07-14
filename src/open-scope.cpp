@@ -182,6 +182,10 @@ bool HandleCommand(const String& input) {
     Serial.println();
 
     return true;
+  } else if (input.startsWith("exit")) {
+    Serial.end();
+    ESP.restart();
+    return true;
   } else if (input.startsWith("snow")) {
     Serial.println("\x1b[36msnow\x1b[0m");
     return true;
